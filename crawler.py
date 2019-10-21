@@ -64,7 +64,6 @@ def directory_discovery(target_url, wordlist):
     else:
         print("\033[0;31;40m\n[===========================]\n\nStarting directory discovery:\n\n[===========================]\n")
         with open(wordlist, "r") as directory_file:
- #           discovered_directories = []
             for line in directory_file:
                 directory = line.strip()
                 test_directory = target_url + "/" + directory
