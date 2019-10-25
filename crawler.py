@@ -58,31 +58,31 @@ def subdomain_discovery(target_url, wordlist):
     print("\033[0;34;40m[+] Subdomain searching finished with success! [+]\n")
 
 def directory_discovery(target_url, wordlist):
+    url = target_url
+    print(url)
+    directories_list = wordlist
+    print(directories_list)
     if not wordlist:
         print("\033[0;33;40mSkipping directory discovery.....Use the '-w' option if you want to craw to discover directories or files....")
         pass
     else:
         print("\033[0;31;40m\n[===========================]\n\nStarting directory discovery:\n\n[===========================]\n")
-        with open(wordlist, "r") as directory_file:
-            for line in directory_file:
-                directory = line.strip()
-                test_directory = "{0}/{1}".format(target_url, directory)
-                response = requests.get(test_directory)
-                if response:
-                    print("\033[0;32;40m[+] Discovered URL --> {0}".format(test_directory))
-                    discovered_directories.append(test_directory)
-            for new_directory in discovered_directories:
-                print("\033[0;34;40m\n### Entering {0} ###\n".format(new_directory))
-                with open(wordlist, "r") as new_directory_file:
-                    for l in new_directory_file:
-                        subdirectory = line.strip()
-                        new_test_directory = new_directory + subdirectory
-                        response = requests.get(new_test_directory)
-                        if response:
-                            print("\033[0;32;40m[+] Discovered a new URL --> {}".format(new_test_directory))
-                            discovered_directories.append(new_test_directory)
+        directory_loop(url, directories_list)
+        print("\033[0;34;40m\n### Searching in the discovered directories ###")
+        for new_directory in discovered_directories:
+            directory_loop(new_directory, directories_list)
 
     print("\033[0;34,40m\n[+] Directory searching finished with succes! [+]\n")
+    
+def directory_loop(target_url, wordlist):
+    with open(wordlist, "r") as directory_file:
+        for line in directory_file:
+            directory = line.strip()
+            test_directory = "{0}/{1}".format(target_url, directory)
+            response = requests.get(test_directory)
+            if response:
+                print("\033[0;32;40m[+] Discovered URL --> {0}".format(test_directory))
+                discovered_directories.append(test_directory)
 
 def file_discovery(target_url, wordlist, filelist):
     print("\033[0;33;40m[+]Do you want to run a file discovey?[+]\n")
