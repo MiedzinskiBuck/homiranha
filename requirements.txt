@@ -2,3 +2,4 @@ urllib.parse
 requests
 optparse
 re
+request-futures

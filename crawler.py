@@ -4,10 +4,13 @@ import urllib.parse
 import requests
 import optparse
 import re
+from concurrent.futures import as_completed
+from requests_futures.sessions import FuturesSession
 
 target_links = []
 discovered_directories = []
 discovered_files = []
+reqs = []
 
 
 def get_arguments():
@@ -47,21 +50,26 @@ def subdomain_discovery(target_url, wordlist):
         target_url = target_url.replace("https://", "")
         target_url = target_url.replace("www.", "")
         print("\033[0;31;40m\n[===========================]\n\nStarting Subdomain Discovery:\n\n[===========================]\n")
-        with open(wordlist, "r") as wordlist_file:
-            for line in wordlist_file:
-                word = line.strip()
-                test_url = "https://{0}.{1}".format(word, target_url)
-                response = request(test_url)
-                if response:
-                    print("\033[0;32;40m[+] Discovered subdomain --> {0}".format(test_url))
+        session = FuturesSession(max_workers = 100)
+        try:
+            with open(wordlist, "r") as wordlist_file:
+                futures = []
+                for line in wordlist_file:
+                    word = line.strip()
+                    test_url = "http://{0}.{1}".format(word, target_url)
+                    futures.append(session.get(test_url, timeout=5))
+                for future in as_completed(futures):
+                    resp = future.result()
+                    if resp:
+                        print("\033[0;32;40m[+] Discovered subdomain --> {0}".format(resp.url))
+        except:
+            print("[-] You got a time out [-]")
 
     print("\033[0;34;40m[+] Subdomain searching finished with success! [+]\n")
 
 def directory_discovery(target_url, wordlist):
     url = target_url
-    print(url)
     directories_list = wordlist
-    print(directories_list)
     if not wordlist:
         print("\033[0;33;40mSkipping directory discovery.....Use the '-w' option if you want to craw to discover directories or files....")
         pass
@@ -75,16 +83,23 @@ def directory_discovery(target_url, wordlist):
     print("\033[0;34,40m\n[+] Directory searching finished with succes! [+]\n")
     
 def directory_loop(target_url, wordlist):
-    with open(wordlist, "r") as directory_file:
-        for line in directory_file:
-            directory = line.strip()
-            test_directory = "{0}/{1}".format(target_url, directory)
-            response = requests.get(test_directory)
-            if response:
-                print("\033[0;32;40m[+] Discovered URL --> {0}".format(test_directory))
-                discovered_directories.append(test_directory)
+    session = FuturesSession(max_workers = 100)
+    try:
+        with open(wordlist, "r") as directory_file:
+            futures = []
+            for line in directory_file:
+                directory = line.strip()
+                test_directory = "{0}/{1}".format(target_url, directory)
+                futures.append(session.get(test_directory, timeout=5))
+            for future in as_completed(futures):
+                resp = future.result()
+                if resp:
+                    print("\033[0;32;40m[+] Discovered URL --> {0}".format(resp.url))
+    except:
+        print("[-] You got a time out [-]")
 
 def file_discovery(target_url, wordlist, filelist):
+    session = FuturesSession(max_workers = 100)
     print("\033[0;33;40m[+]Do you want to run a file discovey?[+]\n")
     run = input("y/N:")
     run = run.lower()
@@ -101,10 +116,13 @@ def file_discovery(target_url, wordlist, filelist):
             wlist = filelist
         print("\033[0;33;40m[+]Starting file discovery...[+]")
         with open(wlist, "r") as filename_file:
+            futures = []
             for line in filename_file:
                 filename = line.strip()
                 test_file = "{0}/{1}{2}".format(target_url, filename, extension) 
-                file_reach = requests.get(test_file)
+                futures.append(session.get(test_file, timeout=5))
+            for future in as_completed(futures):
+                file_reach = future.result()
                 if file_reach:
                     print("\033[0;32;40m[+] Discovered File--> {}".format(test_file))
                     discovered_files.append(test_file)
