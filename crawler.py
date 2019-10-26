@@ -12,6 +12,7 @@ discovered_directories = []
 discovered_files = []
 reqs = []
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def get_arguments():
     parser = optparse.OptionParser()
@@ -30,6 +31,8 @@ def request(url):
     except requests.exceptions.ConnectionError:
         pass
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 def parser(target_url):
     print("\033[0;31;40m\n[====================]\n\nRetrieving HREF links\n\n[====================]\n")
     response = request(target_url)
@@ -38,6 +41,8 @@ def parser(target_url):
         link = urllib.parse.urljoin(target_url, link)
         target_links.append(link)
         print("\033[0;32;40m{0}".format(link))
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def subdomain_discovery(target_url, wordlist):
     print("\033[0;33;40m[+]Do you want to run a subdomain discovery?[+]\n")
@@ -67,6 +72,8 @@ def subdomain_discovery(target_url, wordlist):
 
     print("\033[0;34;40m[+] Subdomain searching finished with success! [+]\n")
 
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 def directory_discovery(target_url, wordlist):
     url = target_url
     directories_list = wordlist
@@ -82,6 +89,8 @@ def directory_discovery(target_url, wordlist):
 
     print("\033[0;34,40m\n[+] Directory searching finished with succes! [+]\n")
     
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 def directory_loop(target_url, wordlist):
     session = FuturesSession(max_workers = 100)
     try:
@@ -97,6 +106,8 @@ def directory_loop(target_url, wordlist):
                     print("\033[0;32;40m[+] Discovered URL --> {0}".format(resp.url))
     except:
         print("[-] You got a time out [-]")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 def file_discovery(target_url, wordlist, filelist):
     session = FuturesSession(max_workers = 100)
@@ -128,6 +139,8 @@ def file_discovery(target_url, wordlist, filelist):
                     discovered_files.append(test_file)
 
     print("\033[0;34,40m[+] File searching finished with succes! [+]")
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 options = get_arguments()
 wlist = options.wordlist
