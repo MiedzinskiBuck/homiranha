@@ -82,16 +82,17 @@ def directory_discovery(target_url, wordlist):
         pass
     else:
         print("\033[0;31;40m\n[===========================]\n\nStarting directory discovery:\n\n[===========================]\n")
-        directory_loop(url, directories_list)
+        main_loop(url, directories_list)
         print("\033[0;34;40m\n### Searching in the discovered directories ###")
         for new_directory in discovered_directories:
-            directory_loop(new_directory, directories_list)
+            new_directory = new_directory[:-1]
+            main_loop(new_directory, directories_list)
 
     print("\033[0;34,40m\n[+] Directory searching finished with succes! [+]\n")
     
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def directory_loop(target_url, wordlist):
+def main_loop(target_url, wordlist):
     session = FuturesSession(max_workers = 100)
     try:
         with open(wordlist, "r") as directory_file:
@@ -103,6 +104,7 @@ def directory_loop(target_url, wordlist):
             for future in as_completed(futures):
                 resp = future.result()
                 if resp:
+                    discovered_directories.append(resp.url)
                     print("\033[0;32;40m[+] Discovered URL --> {0}".format(resp.url))
     except:
         print("[-] You got a time out [-]")
